@@ -4,6 +4,8 @@ package com.xyz.bu.exception;
 import com.xyz.bu.common.ActionStatus;
 
 /**
+ * 业务异常
+ *
  * @author xyz
  * @date 2020/5/18
  */

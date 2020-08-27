@@ -1,8 +1,9 @@
 package com.xyz.bu.config;
 
 import com.xyz.bu.handler.returnn.AutoResultReturnHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -16,8 +17,9 @@ import java.util.List;
  * 源码 {@link org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#invokeInitMethods}
  */
 @Configuration
-@Slf4j
 public class BaseWebMvcConfig implements InitializingBean {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseWebMvcConfig.class);
 
     @Resource
     RequestMappingHandlerAdapter requestMappingHandlerAdapter;
@@ -34,7 +36,7 @@ public class BaseWebMvcConfig implements InitializingBean {
             list.addAll(returnValueHandlers);
         }
         requestMappingHandlerAdapter.setReturnValueHandlers(list);
-        log.info("add owner return value handlers");
+        LOGGER.info("BaseWebMvcConfig add owner return value handlers");
     }
 
 }

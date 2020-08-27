@@ -59,7 +59,7 @@ public abstract class AutoResultReturnSupports {
             writer.print(JSON.toJSONString(jsonResult));
             writer.flush();
         } catch (IOException e) {
-            LOGGER.error("#AutoResultReturnHandler io handler ex ", e);
+            LOGGER.error("AutoResultReturnHandler io handler ex ", e);
             throw new BusinessException("服务器开小差，请稍后再试");
         } finally {
             BaseConstant.START_TIME.remove();
