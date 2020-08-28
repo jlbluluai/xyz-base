@@ -1,6 +1,9 @@
 package com.xyz.bu.cache;
 
-import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -102,6 +105,7 @@ public class MyRedisTemplate {
     }
 
     public void sscan(String key) {
+        // todo
         stringRedisTemplate.opsForSet().scan(key, ScanOptions.scanOptions().count(10).match("0").build());
     }
 
@@ -116,6 +120,29 @@ public class MyRedisTemplate {
         stringRedisTemplate.opsForHash().putAll(key, hash);
     }
 
+    public String hget(String key, String field) {
+        return (String) stringRedisTemplate.opsForHash().get(key, field);
+    }
+
+    public Map<String, String> hmget(String key) {
+        Map<Object, Object> data = stringRedisTemplate.opsForHash().entries(key);
+        Map<String, String> result = new HashMap<>(data.size());
+        data.forEach((k, v) -> {
+            result.put((String) k, (String) v);
+        });
+        return result;
+    }
+
+    public long hsize(String key) {
+        return stringRedisTemplate.opsForHash().size(key);
+    }
+
+    public void hscan(String key) {
+        // todo
+        ScanOptions scanOptions = ScanOptions.scanOptions().count(1).match("0").build();
+        stringRedisTemplate.opsForHash().scan(key, scanOptions);
+    }
+
     /**
      * zset系列
      */
@@ -125,6 +152,93 @@ public class MyRedisTemplate {
 
     public void mzadd(String key, Set<ZSetOperations.TypedTuple<String>> values) {
         stringRedisTemplate.opsForZSet().add(key, values);
+    }
+
+    /**
+     * 大小
+     *
+     * @param key 键
+     * @return 大小
+     */
+    public long zsize(String key) {
+        Long size = stringRedisTemplate.opsForZSet().size(key);
+        return Objects.nonNull(size) ? size : 0;
+    }
+
+    /**
+     * 正序 按索引区间查出值
+     *
+     * @param key   键
+     * @param start 索引开始位
+     * @param end   索引结束位
+     * @return 值的Set
+     */
+    public Set<String> zrange(String key, long start, long end) {
+        return stringRedisTemplate.opsForZSet().range(key, start, end);
+    }
+
+    /**
+     * 正序 按分数区间查出所有值
+     *
+     * @param key 键
+     * @param min 分数min
+     * @param max 分数max
+     * @return 值的Set
+     */
+    public Set<String> zrangeByScore(String key, double min, double max) {
+        return stringRedisTemplate.opsForZSet().rangeByScore(key, min, max);
+    }
+
+    /**
+     * 正序 按分数区间分页查询
+     *
+     * @param key    键
+     * @param min    分数min
+     * @param max    分数max
+     * @param offset 开始点 (页数-1)*count
+     * @param count  每页数量
+     * @return 值的Set
+     */
+    public Set<String> zrangeByScore(String key, double min, double max, long offset, long count) {
+        return stringRedisTemplate.opsForZSet().rangeByScore(key, min, max, offset, count);
+    }
+
+    /**
+     * 逆序 按索引区间查出值
+     *
+     * @param key   键
+     * @param start 索引开始位
+     * @param end   索引结束位
+     * @return 值的Set
+     */
+    public Set<String> zreserveRange(String key, long start, long end) {
+        return stringRedisTemplate.opsForZSet().reverseRange(key, start, end);
+    }
+
+    /**
+     * 逆序 按分数区间查出所有值
+     *
+     * @param key 键
+     * @param min 分数min
+     * @param max 分数max
+     * @return 值的Set
+     */
+    public Set<String> zreverseRangeByScore(String key, double min, double max) {
+        return stringRedisTemplate.opsForZSet().reverseRangeByScore(key, min, max);
+    }
+
+    /**
+     * 逆序 按分数区间分页查询
+     *
+     * @param key    键
+     * @param min    分数min
+     * @param max    分数max
+     * @param offset 开始点 (页数-1)*count
+     * @param count  每页数量
+     * @return 值的Set
+     */
+    public Set<String> zreverseRangeByScore(String key, double min, double max, long offset, long count) {
+        return stringRedisTemplate.opsForZSet().reverseRangeByScore(key, min, max, offset, count);
     }
 
     /**
