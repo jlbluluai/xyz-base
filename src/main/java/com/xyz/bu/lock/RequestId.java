@@ -10,4 +10,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RequestId {
+
+    /**
+     * 锁住的时间
+     *
+     * @return 秒数
+     */
+    int time() default 1;
+
 }
