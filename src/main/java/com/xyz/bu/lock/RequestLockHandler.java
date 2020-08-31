@@ -2,7 +2,7 @@ package com.xyz.bu.lock;
 
 import com.xyz.bu.cache.MyRedisTemplate;
 import com.xyz.bu.common.BaseConstant;
-import com.xyz.bu.exception.BusinessException;
+import com.xyz.bu.utils.BizAssert;
 import org.apache.commons.lang.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -67,9 +67,8 @@ public class RequestLockHandler {
 
         // 判断是否锁住
         String cacheKey = signature.toString().split(" ")[1] + "." + id;
-        if (myRedisTemplate.ttl(cacheKey) != BaseConstant.REDIS_KEY_NOT_EXIST) {
-            throw new BusinessException("操作频繁，请稍后再试");
-        }
+        int result = myRedisTemplate.ttl(cacheKey);
+        BizAssert.isTrue(result == BaseConstant.REDIS_KEY_NOT_EXIST, "操作频繁，请稍后再试");
 
         // 设置过期时间
         myRedisTemplate.setex(cacheKey, lockTime, "1");
