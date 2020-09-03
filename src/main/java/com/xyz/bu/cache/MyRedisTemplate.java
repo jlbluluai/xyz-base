@@ -1,5 +1,6 @@
 package com.xyz.bu.cache;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -262,7 +263,7 @@ public class MyRedisTemplate {
 
     public List<String> lpopBatch(String key, int size) {
         List<String> result = stringRedisTemplate.opsForList().range(key, 0, size - 1);
-        if (result == null) {
+        if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         }
 
