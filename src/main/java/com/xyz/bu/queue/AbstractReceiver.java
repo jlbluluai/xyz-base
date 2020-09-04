@@ -4,12 +4,12 @@ import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Resource;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -22,26 +22,37 @@ public abstract class AbstractReceiver<T> extends AbstractQueue implements Queue
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReceiver.class);
 
-    @Resource
-    private Executor queueExecutor;
+    @Resource(name = "queueExecutor")
+    private ThreadPoolTaskExecutor executor;
 
     private final Class<T> handleClazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     private final int readSize = readSize();
 
+    /**
+     * 存活标志
+     */
+    private boolean activeFlag;
+
     @Override
     public void executeQueue() {
-        queueExecutor.execute(() -> {
-            while (true) {
-                List<T> dataList = getBatch();
-                if (CollectionUtils.isNotEmpty(dataList)) {
-                    handle(dataList);
-                }
+        executor.execute(() -> {
+            try {
+                activeFlag = true;
+                while (true) {
+                    List<T> dataList = getBatch();
+                    if (CollectionUtils.isNotEmpty(dataList)) {
+                        handle(dataList);
+                    }
 
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    LOGGER.error("#AbstractReceiver.executeQueue thread sleep error", e);
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        LOGGER.error("thread sleep error", e);
+                    }
                 }
+            } catch (Exception e) {
+                activeFlag = false;
+                LOGGER.error("queue ex and quit queue={}", CACHE_KEY, e);
             }
         });
     }
@@ -77,5 +88,19 @@ public abstract class AbstractReceiver<T> extends AbstractQueue implements Queue
      */
     protected abstract void handle(List<T> dataList);
 
+    @Override
+    public boolean isActiveFlag() {
+        return activeFlag;
+    }
+
+    @Override
+    public String queueName() {
+        return CACHE_KEY;
+    }
+
+    @Override
+    public long queueSize() {
+        return myRedisTemplate.lsize(CACHE_KEY);
+    }
 
 }

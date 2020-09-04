@@ -74,6 +74,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/Application.class</exclude>
+                        <exclude>**/application.yml</exclude>
                     </excludes>
                 </configuration>
             </plugin>

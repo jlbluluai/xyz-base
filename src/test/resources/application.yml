@@ -1,0 +1,4 @@
+queue:
+  executor:
+    enable: true
+    size: 6
