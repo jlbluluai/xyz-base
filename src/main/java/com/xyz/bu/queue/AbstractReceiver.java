@@ -1,15 +1,19 @@
 package com.xyz.bu.queue;
 
 import com.alibaba.fastjson.JSON;
+import com.xyz.bu.exception.BusinessException;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,7 +26,8 @@ public abstract class AbstractReceiver<T> extends AbstractQueue implements Queue
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractReceiver.class);
 
-    @Resource(name = "queueExecutor")
+    @Autowired(required = false)
+    @Qualifier("queueExecutor")
     private ThreadPoolTaskExecutor executor;
 
     private final Class<T> handleClazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
@@ -32,6 +37,13 @@ public abstract class AbstractReceiver<T> extends AbstractQueue implements Queue
      * 存活标志
      */
     private boolean activeFlag;
+
+    @PostConstruct
+    public void init() {
+        if (Objects.isNull(executor)) {
+            throw new BusinessException("未开启队列，请不要在程序里注册队列的bean，请核对");
+        }
+    }
 
     @Override
     public void executeQueue() {
