@@ -1,6 +1,7 @@
 package com.xyz.bu.lock;
 
 import java.lang.annotation.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author xyz
@@ -11,11 +12,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface RequestId {
 
-    /**
-     * 锁住的时间
-     *
-     * @return 秒数
-     */
-    int time() default 1;
+    long time() default 1;
+
+    TimeUnit unit() default TimeUnit.SECONDS;
 
 }

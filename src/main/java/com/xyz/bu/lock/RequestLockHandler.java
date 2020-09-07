@@ -1,7 +1,6 @@
 package com.xyz.bu.lock;
 
 import com.xyz.bu.cache.MyRedisTemplate;
-import com.xyz.bu.common.BaseConstant;
 import com.xyz.bu.utils.BizAssert;
 import org.apache.commons.lang.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author xyz
@@ -37,13 +37,15 @@ public class RequestLockHandler {
         Annotation[][] parameterAnnotations = signature.getMethod().getParameterAnnotations();
 
         Long id = null;
-        int lockTime = 0;
+        long lockTime = 0;
+        TimeUnit timeUnit = null;
         for (Annotation[] parameterAnnotation : parameterAnnotations) {
             int index = ArrayUtils.indexOf(parameterAnnotations, parameterAnnotation);
             for (Annotation annotation : parameterAnnotation) {
                 if (annotation instanceof RequestId) {
                     Object value = args[index];
                     lockTime = ((RequestId) annotation).time();
+                    timeUnit = ((RequestId) annotation).unit();
                     if (lockTime <= 0) {
                         lockTime = 1;
                     }
@@ -67,11 +69,8 @@ public class RequestLockHandler {
 
         // 判断是否锁住
         String cacheKey = signature.toString().split(" ")[1] + "." + id;
-        int result = myRedisTemplate.ttl(cacheKey);
-        BizAssert.isTrue(result == BaseConstant.REDIS_KEY_NOT_EXIST, "操作频繁，请稍后再试");
-
-        // 设置过期时间
-        myRedisTemplate.setex(cacheKey, lockTime, "1");
+        boolean lock = myRedisTemplate.setexnx(cacheKey, "1", lockTime, timeUnit);
+        BizAssert.isTrue(lock, "操作频繁，请稍后再试");
     }
 
 }

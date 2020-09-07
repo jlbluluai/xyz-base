@@ -55,8 +55,22 @@ public class MyRedisTemplate {
         stringRedisTemplate.opsForValue().set(key, val);
     }
 
-    public void setex(String key, int seconds, String val) {
+    public void setex(String key, long seconds, String val) {
         stringRedisTemplate.opsForValue().set(key, val, seconds, TimeUnit.SECONDS);
+    }
+
+    public void setex(String key, long seconds, String val, TimeUnit timeUnit) {
+        stringRedisTemplate.opsForValue().set(key, val, seconds, timeUnit);
+    }
+
+    public boolean setexnx(String key, String val, long seconds) {
+        Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(key, val, seconds, TimeUnit.SECONDS);
+        return Objects.nonNull(result) ? result : false;
+    }
+
+    public boolean setexnx(String key, String val, long seconds, TimeUnit timeUnit) {
+        Boolean result = stringRedisTemplate.opsForValue().setIfAbsent(key, val, seconds, timeUnit);
+        return Objects.nonNull(result) ? result : false;
     }
 
     public void mset(Map<String, String> hash) {
