@@ -1,10 +1,11 @@
 package com.xyz.bu.cache;
 
-import org.apache.commons.collections.CollectionUtils;
+import com.xyz.bu.utils.CastUtils;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -82,6 +83,7 @@ public class MyRedisTemplate {
         stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             connection.openPipeline();
             hash.forEach((key, value) -> connection.expire(key.getBytes(), seconds));
+            connection.close();
             return null;
         });
     }
@@ -275,14 +277,20 @@ public class MyRedisTemplate {
         return stringRedisTemplate.opsForList().leftPop(key);
     }
 
+    @NonNull
     public List<String> lpopBatch(String key, int size) {
-        List<String> result = stringRedisTemplate.opsForList().range(key, 0, size - 1);
-        if (CollectionUtils.isEmpty(result)) {
-            return Collections.emptyList();
-        }
+        List<Object> resultList = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            connection.openPipeline();
+            byte[] keyByte = key.getBytes();
+            // 取出
+            connection.lRange(keyByte, 0, size - 1);
+            // 截取
+            connection.lTrim(keyByte, size, -1);
+            connection.close();
+            return null;
+        });
 
-        stringRedisTemplate.opsForList().trim(key, size, -1);
-        return result;
+        return CastUtils.castList(resultList.get(0), String.class);
     }
 
     public void rpush(String key, String value) {
@@ -322,34 +330,34 @@ public class MyRedisTemplate {
     public void pipeline() {
         //        1.executePipelined 重写 入参 RedisCallback 的doInRedis方法
         List<Object> resultList = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-//                2.connection 打开管道
+            //                2.connection 打开管道
             connection.openPipeline();
 
-//                3.connection 给本次管道内添加 要一次性执行的多条命令
+            //                3.connection 给本次管道内添加 要一次性执行的多条命令
 
-//                3.1 一个set操作
+            //                3.1 一个set操作
             byte[] key1 = "mykey1".getBytes();
             byte[] value1 = "字符串value".getBytes();
             connection.set(key1, value1);
 
-//                3.2一个批量mset操作
+            //                3.2一个批量mset操作
             Map<byte[], byte[]> tuple = new HashMap<>();
             tuple.put("m_mykey1".getBytes(), "m_value1".getBytes());
             tuple.put("m_mykey2".getBytes(), "m_value2".getBytes());
             tuple.put("m_mykey3".getBytes(), "m_value3".getBytes());
             connection.mSet(tuple);
 
-//                 3.3一个get操作
+            //                 3.3一个get操作
             connection.get("m_mykey2".getBytes());
 
-//                4.关闭管道 不需要close 否则拿不到返回值
-//                connection.closePipeline();
+            //                4.关闭管道 不需要close 否则拿不到返回值
+            //                connection.closePipeline();
 
-//                这里一定要返回null，最终pipeline的执行结果，才会返回给最外层
+            //                这里一定要返回null，最终pipeline的执行结果，才会返回给最外层
             return null;
         });
 
-//        5.最后对redis pipeline管道操作返回结果进行判断和业务补偿
+        //        5.最后对redis pipeline管道操作返回结果进行判断和业务补偿
         for (Object str : resultList) {
             System.out.println(str);
         }
