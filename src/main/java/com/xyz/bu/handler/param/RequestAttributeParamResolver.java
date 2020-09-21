@@ -1,7 +1,6 @@
 package com.xyz.bu.handler.param;
 
 import org.apache.commons.lang.math.NumberUtils;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
  * @author xyz
  * @date 2020/7/2
  */
-@Configuration
 public class RequestAttributeParamResolver implements HandlerMethodArgumentResolver {
 
     @Override

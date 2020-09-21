@@ -6,7 +6,6 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit;
  * @author xyz
  * @date 2019-06-25
  */
-@Repository
 public class MyRedisTemplate {
 
     @Resource

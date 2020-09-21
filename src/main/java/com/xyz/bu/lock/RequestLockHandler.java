@@ -8,7 +8,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/8/28
  */
 @Aspect
-@Component
 public class RequestLockHandler {
 
     @Resource

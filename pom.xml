@@ -73,7 +73,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/Application.class</exclude>
+                        <exclude>**/starter/**</exclude>
                         <exclude>**/application.yml</exclude>
                     </excludes>
                 </configuration>

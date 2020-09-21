@@ -1,0 +1,6 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.xyz.bu.config.BaseThreadFactory,\
+com.xyz.bu.config.BaseWebMvcConfig,\
+com.xyz.bu.config.BaseControllerRegister,\
+com.xyz.bu.config.BaseComponentRegister
