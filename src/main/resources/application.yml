@@ -1,3 +1,9 @@
+spring:
+  elasticsearch:
+    enable: false
+    rest:
+      uris: http://localhost:9200
+
 queue:
   executor:
     enable: false
