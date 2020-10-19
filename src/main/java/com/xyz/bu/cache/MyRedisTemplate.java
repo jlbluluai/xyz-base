@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.lang.NonNull;
 
 import javax.annotation.Resource;
@@ -321,6 +322,23 @@ public class MyRedisTemplate {
         return null;
     }
 
+    /**
+     * 脚本系列
+     */
+    /**
+     * 执行脚本
+     *
+     * @param scripts    例：return redis.call('GET',KEYS[1])
+     * @param resultType 返回值类型的class
+     * @param keys       键列表 没有值也不得传null
+     * @param args       值数组 没有值也不得传null
+     * @param <T>        指定类型
+     * @return 指定类型的返回值
+     */
+    public <T> T eval(@NonNull String scripts, @NonNull Class<T> resultType, @NonNull List<String> keys, @NonNull Object[] args) {
+        DefaultRedisScript<T> redisScript = new DefaultRedisScript<>(scripts, resultType);
+        return stringRedisTemplate.execute(redisScript, keys, args);
+    }
 
     /**
      * 管道例子
