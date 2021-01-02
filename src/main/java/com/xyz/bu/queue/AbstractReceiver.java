@@ -52,8 +52,14 @@ public abstract class AbstractReceiver<T> extends AbstractQueue implements Queue
                 activeFlag = true;
                 while (true) {
                     List<T> dataList = getBatch();
+
                     if (CollectionUtils.isNotEmpty(dataList)) {
-                        handle(dataList);
+                        // 业务逻辑的异常不影响队列的运行
+                        try {
+                            handle(dataList);
+                        } catch (Exception e) {
+                            LOGGER.error("handle ex queue = {}, dataList = {}", CACHE_KEY, dataList, e);
+                        }
                     }
 
                     try {
@@ -72,17 +78,29 @@ public abstract class AbstractReceiver<T> extends AbstractQueue implements Queue
     /**
      * 获取一组元素
      *
-     * @return
+     * @return 元素集合
+     * if ex, will sleep 1 min and return emptyList
      */
     private List<T> getBatch() {
-        // 若大小为1 直接用pop方式
-        if (readSize == 1) {
-            String result = myRedisTemplate.lpop(CACHE_KEY);
-            return Collections.singletonList(JSON.parseObject(result, handleClazz));
+        try {
+            // 若大小为1 直接用pop方式
+            if (readSize == 1) {
+                String result = myRedisTemplate.lpop(CACHE_KEY);
+                return Collections.singletonList(JSON.parseObject(result, handleClazz));
+            }
+
+            List<String> result = myRedisTemplate.lpopBatch(CACHE_KEY, readSize);
+            return result.stream().map(item -> JSON.parseObject(item, handleClazz)).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOGGER.error("getBatch error queue = {}", CACHE_KEY, e);
         }
 
-        List<String> result = myRedisTemplate.lpopBatch(CACHE_KEY, readSize);
-        return result.stream().map(item -> JSON.parseObject(item, handleClazz)).collect(Collectors.toList());
+        try {
+            Thread.sleep(60000);
+        } catch (Exception e) {
+            LOGGER.error("sleep error", e);
+        }
+        return Collections.emptyList();
     }
 
 

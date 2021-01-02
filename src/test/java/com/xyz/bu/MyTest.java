@@ -1,7 +1,8 @@
 package com.xyz.bu;
 
-import com.xyz.bu.lock.Demo;
+import com.xyz.bu.cache.MyRedisTemplate;
 import org.junit.Test;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Resource;
 
@@ -38,11 +39,11 @@ public class MyTest extends BaseTest{
     }
 
     @Resource
-    private Demo demo;
+    private MyRedisTemplate myRedisTemplate;
 
     @Test
-    public void test(){
-        demo.sys(1);
+    public void testRedis(){
+        myRedisTemplate.get("a");
     }
 
 }
