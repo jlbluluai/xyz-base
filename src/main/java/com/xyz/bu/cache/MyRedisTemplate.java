@@ -87,6 +87,10 @@ public class MyRedisTemplate {
         });
     }
 
+    public List<String> mget(List<String> keys) {
+        return stringRedisTemplate.opsForValue().multiGet(keys);
+    }
+
     public String get(String key) {
         return stringRedisTemplate.opsForValue().get(key);
     }
