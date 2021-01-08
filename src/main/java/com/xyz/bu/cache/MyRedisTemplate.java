@@ -11,6 +11,7 @@ import org.springframework.lang.NonNull;
 import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author xyz
@@ -88,7 +89,9 @@ public class MyRedisTemplate {
     }
 
     public List<String> mget(List<String> keys) {
-        return stringRedisTemplate.opsForValue().multiGet(keys);
+        List<String> list = stringRedisTemplate.opsForValue().multiGet(keys);
+        return list != null ? list.stream().filter(Objects::nonNull).collect(Collectors.toList()) :
+                Collections.emptyList();
     }
 
     public String get(String key) {
@@ -151,6 +154,10 @@ public class MyRedisTemplate {
             result.put((String) k, (String) v);
         });
         return result;
+    }
+
+    public void hmdel(String key, String... hashKeys) {
+        stringRedisTemplate.opsForHash().delete(key, (Object[]) hashKeys);
     }
 
     public long hsize(String key) {
