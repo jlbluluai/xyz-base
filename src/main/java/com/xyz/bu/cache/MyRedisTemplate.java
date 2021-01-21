@@ -115,6 +115,10 @@ public class MyRedisTemplate {
         return stringRedisTemplate.opsForSet().add(key, val);
     }
 
+    public Long sadd(String key, String[] vals) {
+        return stringRedisTemplate.opsForSet().add(key, vals);
+    }
+
     public Set<String> smembers(String key) {
         return stringRedisTemplate.opsForSet().members(key);
     }
