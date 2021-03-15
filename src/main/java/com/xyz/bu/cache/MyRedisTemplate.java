@@ -108,6 +108,15 @@ public class MyRedisTemplate {
         return Objects.nonNull(value) ? value : 0;
     }
 
+    public void setBit(String key, long offset, boolean flag) {
+        stringRedisTemplate.opsForValue().setBit(key, offset, flag);
+    }
+
+    public boolean getBit(String key, long offset) {
+        Boolean flag = stringRedisTemplate.opsForValue().getBit(key, offset);
+        return Objects.nonNull(flag) ? flag : false;
+    }
+
     /**
      * set系列
      */
