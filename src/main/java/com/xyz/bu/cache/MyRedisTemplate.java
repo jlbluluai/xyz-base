@@ -132,6 +132,11 @@ public class MyRedisTemplate {
         return stringRedisTemplate.opsForSet().members(key);
     }
 
+    public boolean sismember(String key, String val) {
+        Boolean isSuccess = stringRedisTemplate.opsForSet().isMember(key, val);
+        return Objects.nonNull(isSuccess) ? isSuccess : false;
+    }
+
     public Long srem(String key, String val) {
         return stringRedisTemplate.opsForSet().remove(key, val);
     }
