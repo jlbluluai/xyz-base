@@ -2,3 +2,5 @@
 /target/
 /.idea/
 /xyz-base.iml
+/src/test/
+.gitignore
